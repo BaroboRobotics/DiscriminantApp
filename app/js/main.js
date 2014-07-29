@@ -52,18 +52,18 @@ app.controller('predictController', ['$scope', 'navigationFactory', 'robotFactor
 	function($scope, navigationFactory, robotFactory) {
 		navigationFactory.setName('Predict');
 		navigationFactory.setLink('/#predict');
-		$scope.dataset = [{ data:[], yaxis: 1}];
-		$scope.chartOptions = {
-			legend: {
-				show: true
-			}
-		};
+		$scope.data = [];
+		$scope.options = {};
+			
+		$scope.dataset = [{ data: [], yaxis: 1}];
+			
 		function calc(x) {
 			y = (x * x) - (8 * x) + 7;
 			return y;
 		}
-		for (var x = 0; x < 9; x++) {
-			$scope.dataset[0].data.push = [x, calc(x)];
+		for (var x = 0; x <= 8; x+= .25) {
+			$scope.data.push([x, calc(x)]);
+			$scope.dataset[0].data.push([x, calc(x)]);
 		}
 	}
 ]).controller('navigationController', ['$scope', 'navigationFactory',
@@ -97,7 +97,30 @@ app.directive('robotManager', function() {
 		link: function(scope, elem) {
 			return elem.replaceWith(Linkbots.managerElement());
 		}
-	}
+	};
+}).directive('chart', function() {
+	return{
+        restrict: 'E',
+        link: function(scope, elem, attrs){
+        	// var chartOptions = scope[attrs.chartOptions];
+            var chart = null,
+                options = {};
+                    
+            var data = scope[attrs.ngModel];            
+            
+            // If the data changes somehow, update it in the chart
+            scope.$watch('data', function(v){
+                 if(!chart){
+                    chart = $.plot(elem, [v] , options);
+                    elem.show();
+                }else{
+                    chart.setData([v]);
+                    chart.setupGrid();
+                    chart.draw();
+                }
+            });
+        }
+    };
 });
 
 app.factory('navigationFactory', function() {

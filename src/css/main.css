@@ -64,3 +64,8 @@ body {
   border-bottom: 1px solid #ccc;
   margin-bottom: 3px;
 }
+chart {
+    display: block;
+    width:250px;
+    height:250px;
+}
