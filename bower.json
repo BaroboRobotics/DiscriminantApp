@@ -19,7 +19,7 @@
   "dependencies": {
     "angular": "~1.2.20",
     "bootstrap": "~3.2.0",
-    "linkbotjs": "BaroboRobotics/LinkbotJS#develop",
+    "linkbotjs": "BaroboRobotics/LinkbotJS",
     "angular-flot": "~0.0.5"
   },
   "devDependencies": {

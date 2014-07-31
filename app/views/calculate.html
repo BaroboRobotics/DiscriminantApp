@@ -6,7 +6,7 @@
 </div>
 <div class="row">
 	<div class="col-sm-12 col-md-12">
-		<h2>Predict</h2>
+		<h2>Calculate</h2>
 		<p>
 			How many times will the graph of y = x<sup>2</sup> - 8x + 7 <br />
 			<span style="color: blue;">a = 1</span>; 
@@ -15,17 +15,13 @@
 			Cross the x-axis?
 		</p>
 		<chart ng-model="model.data" chart-options="model.options"></chart>
-		<hr />
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(1)">One</button></p>
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(2)">Two</button></p>
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(3)">Three</button></p>
 	</div>
 </div>
 <div class="row">
 	<div class="col-sm-12 col-md-12">
 		<ul class="pager">
-			<li class="previous"><a href="#/">&larr; Setup</a></li>
-			<li class="next"><a href="#/calculate">Calculate &rarr;</a></li>
+			<li class="previous"><a href="#/predict">&larr; Setup</a></li>
+			<li class="next"><a href="#/explore">Explore &rarr;</a></li>
 		</ul>
 	</div>
 </div>

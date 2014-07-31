@@ -8,6 +8,9 @@ app.config(['$routeProvider', function($routeProvider) {
 	}).when('/predict', {
 		controller: 'predictController',
 		templateUrl: 'views/predict.html'
+	}).when('/calculate', {
+		controller: 'calculateController',
+		templateUrl: 'views/calculate.html'
 	})
 	.otherwise({ redirectTo: '/'});
 
@@ -16,11 +19,14 @@ app.config(['$routeProvider', function($routeProvider) {
 
 app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory', '$timeout',
 	function($scope, navigationFactory, robotFactory, $timeout) {
+
+		// Set Navigation
+		navigationFactory.setName('Setup');
+		navigationFactory.setLink('/#');
+		// Set Scope.
 		$scope.model = {
 			acquired: false
 		};
-		navigationFactory.setName('Setup');
-		navigationFactory.setLink('/#');
 		$scope.waitForRobot = function() {
 			var x;
 			x = Linkbots.acquire(1);
@@ -41,30 +47,104 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 			}
 			return false;
 		}
+		// Check For Robot.
 		if (!robotFactory.getRobot(0)) {
 			$timeout($scope.waitForRobot, 1000);
 		} else {
 			$scope.setAcquired(true);
 		}
 	}
-])
-app.controller('predictController', ['$scope', 'navigationFactory', 'robotFactory',
-	function($scope, navigationFactory, robotFactory) {
+]).controller('predictController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory',
+	function($scope, navigationFactory, robotFactory, predictFactory) {
+		// Set Navigation
 		navigationFactory.setName('Predict');
 		navigationFactory.setLink('/#predict');
-		$scope.data = [];
-		$scope.options = {};
-			
-		$scope.dataset = [{ data: [], yaxis: 1}];
-			
+		// Set Scope.
+		$scope.model = {
+			data: [],
+			options: { xaxis: {tickSize: 1} }
+
+		};
+		$scope.predict = function(value) {
+			predictFactory.setPrediction(value);
+		};
+		// Generate Graph Data. TODO: make this a sevice.
 		function calc(x) {
 			y = (x * x) - (8 * x) + 7;
 			return y;
 		}
+		$scope.model.data.push({ data: [[0,0]], color:"blue", points: { show: true } });
+		var functionLine = { data: []};
 		for (var x = 0; x <= 8; x+= .25) {
-			$scope.data.push([x, calc(x)]);
-			$scope.dataset[0].data.push([x, calc(x)]);
+			functionLine.data.push([x, calc(x)]);
 		}
+		$scope.model.data.push(functionLine);
+
+	}
+]).controller('calculateController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$timeout',
+	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
+		// Set Navigation
+		navigationFactory.setName('Calculate');
+		navigationFactory.setLink('/#calculate');
+		// Define private function. TODO: make this a sevice.
+		function calc(x) {
+			y = (x * x) - (8 * x) + 7;
+			return y;
+		}
+		// Set Scope.
+		$scope.model = {
+			data: [],
+			options: { xaxis: {tickSize: 1} },
+			prediction: predictFactory.getPrediction(),
+			x: 0,
+			y: 0
+		};
+		$scope.startSimulation = function() {
+			if ($scope.model.y < 7) {
+				$scope.model.y += 1;
+				$scope.model.data = [];
+				var functionLine = { data: []};
+				for (var x = 0; x <= 8; x+= .25) {
+					functionLine.data.push([x, calc(x)]);
+				}
+				$scope.model.data.push(functionLine);
+				$scope.model.data.push({ data: [[$scope.model.x, $scope.model.y]],
+						 color:"blue",
+						 points: { show: true } });
+				$timeout($scope.startSimulation, 1000);
+			} else {
+				$timeout($scope.moveRobotOnGraph, 1000);
+			}
+		}
+		$scope.moveRobotOnGraph = function() {
+			if ($scope.model.x < 8) { 
+				$scope.model.x += .50;
+				var color = "blue";
+				if (calc($scope.model.x) == 0) {
+					color = "red";
+				}
+				$scope.model.data = [];
+				var functionLine = { data: []};
+				for (var x = 0; x <= 8; x+= .25) {
+					functionLine.data.push([x, calc(x)]);
+				}
+				$scope.model.data.push(functionLine);
+				$scope.model.data.push({ data: [[$scope.model.x,calc($scope.model.x)]],
+										 color:color,
+										 points: { show: true } });
+				$timeout($scope.moveRobotOnGraph, 1000);
+			}
+		};
+		// Generate Graph Data.
+		var functionLine = { data: []};
+		for (var x = 0; x <= 8; x+= .25) {
+			functionLine.data.push([x, calc(x)]);
+		}
+		$scope.model.data.push(functionLine);
+		$scope.model.data.push({ data: [[0,0]], color:"blue", points: { show: true } });
+		
+		// Start Moving the robot and graph.
+		$timeout($scope.startSimulation, 1000);
 	}
 ]).controller('navigationController', ['$scope', 'navigationFactory',
 	function($scope, navigationFactory) {
@@ -106,15 +186,18 @@ app.directive('robotManager', function() {
             var chart = null,
                 options = {};
                     
-            var data = scope[attrs.ngModel];            
-            
+            var data = scope.$eval(attrs.ngModel);
+            var dataOptions = scope.$eval(attrs.chartOptions);
+            if (dataOptions) {
+            	options = dataOptions;
+            }
             // If the data changes somehow, update it in the chart
-            scope.$watch('data', function(v){
+            scope.$watchCollection(attrs.ngModel, function(v){
                  if(!chart){
-                    chart = $.plot(elem, [v] , options);
+                    chart = $.plot(elem, v, options);
                     elem.show();
                 }else{
-                    chart.setData([v]);
+                    chart.setData(v);
                     chart.setupGrid();
                     chart.draw();
                 }
@@ -137,6 +220,16 @@ app.factory('navigationFactory', function() {
 		},
 		setLink: function(newLink) {
 			data.link = newLink;
+		}
+	}
+}).factory('predictFactory', function() {
+	var prediction = 0;
+	return {
+		setPrediction: function(value) {
+			prediction = value;
+		},
+		getPrediction: function() {
+			return prediction;
 		}
 	}
 }).factory('robotFactory', function() {
