@@ -7,16 +7,60 @@
 <div class="row">
 	<div class="col-sm-12 col-md-12">
 		<h2>Calculate</h2>
-		<p>
-			How many times will the graph of y = x<sup>2</sup> - 8x + 7 <br />
-			<span style="color: blue;">a = 1</span>; 
-			<span style="color: red;">b = 8</span>;
-			<span style="color: green;">c = 7</span><br />
-			Cross the x-axis?
-		</p>
 		<chart ng-model="model.data" chart-options="model.options"></chart>
+		<p>
+			Graph of y = x<sup>2</sup> - 8x + 7<br />
+			where <span style="color: blue;">a = 1</span>,  
+			<span style="color: red;">b = 8</span>, and
+			<span style="color: green;">c = 7</span>
+		</p>
+		<hr />
+		<div class="row" style="margin-top: 10px;">
+			<div class="col-sm-2 col-md-2">
+				<div class="pull-right">
+					b<sup>2</sup> - 4ac 
+				</div>
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= (-8)<sup>2</sup> - 4(1)(7)
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2 col-md-2">
+				&nbsp;
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= 64 - 28
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2 col-md-2">
+				&nbsp;
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= 36 &larr; positive
+				</div>
+			</div>
+		</div>
+		<hr />
 		<h3>Examples</h3>
-		
+		<h4>b<sup>2</sup> - 4ac is Positive</h4>
+		<chart ng-model="model.exmp1Data"></chart>
+		<a class="btn btn-primary" href="#/example1">Show an example</a>
+		<hr />
+		<h4>b<sup>2</sup> - 4ac is Zero</h4>
+		<chart ng-model="model.exmp2Data"></chart>
+		<a class="btn btn-primary" href="#/example2">Show an example</a>
+		<hr />
+		<h4>b<sup>2</sup> - 4ac is Negative</h4>
+		<chart ng-model="model.exmp3Data"></chart>
+		<a class="btn btn-primary" href="#/example3">Show an example</a>
+		<hr />
 	</div>
 </div>
 <div class="row">

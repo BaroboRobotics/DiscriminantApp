@@ -1,0 +1,78 @@
+
+<div class="row">
+	<div class="col-sm-12 col-md-12">
+		<h1 style="border-bottom: 1px solid gray;">The Discriminant</h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 col-md-12">
+		<h2>Explore</h2>
+		
+		<p>
+			Use the discriminent to find the number of x-intercepts for this quadratic equation.
+		</p>
+		<form role="form" class="form-inline" validate="validate">
+			<div class="row">
+				<div class="form-group col-sm-12 col-md-12">
+					<input type="text" class="form-control input-sm" id="a-value" placeHolder="_" data-ng-model="model.a"
+						style="width:50px;" min="-20" max="20" pattern="-{0,1}\d{1,2}" required oninvalid="this.setCustomValidity('Enter a number between -20 and 20')" oninput="setCustomValidity('')" />
+					<label for="a-value" style="margin-right: 10px;">x<sup>2</sup></label>
+					<input type="text" class="form-control input-sm" id="b-value" placeHolder="_" data-ng-model="model.b"
+						style="width:50px;" min="-20" max="20" pattern="-{0,1}\d{1,2}" required oninvalid="this.setCustomValidity('Enter a number between -20 and 20')" oninput="setCustomValidity('')" />
+					<label for="b-value" style="margin-right: 10px;">x</label>
+					<input type="text" class="form-control input-sm" id="c-value" placeHolder="_" data-ng-model="model.c"
+						style="width:50px;" min="-20" max="20" pattern="-{0,1}\d{1,2}" required oninvalid="this.setCustomValidity('Enter a number between -20 and 20')" oninput="setCustomValidity('')" />
+					<label for="c-value">&nbsp;</label>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 10px;">
+				<div class="form-group col-sm-12 col-md-12">
+					<button type="submit" class="btn btn-default" data-ng-click="calculate()">Check your solution</button>
+				</div>
+			</div>
+		</form>
+		<hr />
+		<chart ng-model="model.data" chart-options="model.options"></chart>
+		<hr />
+		<div class="row" style="margin-top: 10px;">
+			<div class="col-sm-2 col-md-2">
+				<div class="pull-right">
+					b<sup>2</sup> - 4ac 
+				</div>
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= ({{ model.b }})<sup>2</sup> - 4({{ model.a }})({{ model.c}})
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2 col-md-2">
+				&nbsp;
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= {{ model.b * model.b }} - {{ 4 * model.a  * model.c}}
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2 col-md-2">
+				&nbsp;
+			</div>
+			<div class="col-sm-10  col-md-10">
+				<div class="pull-left">
+					= {{ (model.b * model.b) - (4 * model.a  * model.c) }} &larr; {{ model.type }}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 col-md-12">
+		<ul class="pager">
+			<li class="previous"><a href="#/calculate">&larr; Calculate</a></li>
+			<li class="next"><a href="#/explore">Challenge &rarr;</a></li>
+		</ul>
+	</div>
+</div>

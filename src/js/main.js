@@ -11,6 +11,20 @@ app.config(['$routeProvider', function($routeProvider) {
 	}).when('/calculate', {
 		controller: 'calculateController',
 		templateUrl: 'views/calculate.html'
+	}).when('/explore', {
+		controller: 'exploreController',
+		templateUrl: 'views/explore.html'
+	}).when('/example1', {
+		controller: 'exampleOneController',
+		templateUrl: 'views/example1.html'
+	})
+	.when('/example2', {
+		controller: 'exampleTwoController',
+		templateUrl: 'views/example2.html'
+	})
+	.when('/example3', {
+		controller: 'exampleThreeController',
+		templateUrl: 'views/example3.html'
 	})
 	.otherwise({ redirectTo: '/'});
 
@@ -22,7 +36,7 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 
 		// Set Navigation
 		navigationFactory.setName('Setup');
-		navigationFactory.setLink('/#');
+		navigationFactory.setLink('#/');
 		// Set Scope.
 		$scope.model = {
 			acquired: false
@@ -54,11 +68,11 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 			$scope.setAcquired(true);
 		}
 	}
-]).controller('predictController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory',
-	function($scope, navigationFactory, robotFactory, predictFactory) {
+]).controller('predictController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$location',
+	function($scope, navigationFactory, robotFactory, predictFactory, $location) {
 		// Set Navigation
 		navigationFactory.setName('Predict');
-		navigationFactory.setLink('/#predict');
+		navigationFactory.setLink('#/predict');
 		// Set Scope.
 		$scope.model = {
 			data: [],
@@ -67,6 +81,8 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 		};
 		$scope.predict = function(value) {
 			predictFactory.setPrediction(value);
+			return $location.path('/calculate');
+
 		};
 		// Generate Graph Data. TODO: make this a sevice.
 		function calc(x) {
@@ -85,15 +101,35 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
 		// Set Navigation
 		navigationFactory.setName('Calculate');
-		navigationFactory.setLink('/#calculate');
+		navigationFactory.setLink('#/calculate');
 		// Define private function. TODO: make this a sevice.
 		function calc(x) {
-			y = (x * x) - (8 * x) + 7;
+			var y = (x * x) - (8 * x) + 7;
 			return y;
+		}
+		function exampleOneFunction(x) {
+			var y = (x * x) - x - 6;
+			return y;
+		}
+		function exampleTwoFunction(x) {
+			var y = (2 * x * x) + (12 * x) + 18;
+			return y;
+		}
+		function exampleThreeFunction(x) {
+			var y = (x * x) + (2 * x) + 6;
+			return y;
+		}
+		function generateData(arr, func, min, max, inc) {
+			for (var x = min; x <= max; x+= inc) {
+				arr.data.push([x, func(x)]);
+			}
 		}
 		// Set Scope.
 		$scope.model = {
 			data: [],
+			exmp1Data: [],
+			exmp2Data: [],
+			exmp3Data: [],
 			options: { xaxis: {tickSize: 1} },
 			prediction: predictFactory.getPrediction(),
 			x: 0,
@@ -111,12 +147,12 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 				$scope.model.data.push({ data: [[$scope.model.x, $scope.model.y]],
 						 color:"blue",
 						 points: { show: true } });
-				$timeout($scope.startSimulation, 1000);
+				$timeout($scope.startSimulation, 250);
 			} else {
-				$timeout($scope.moveRobotOnGraph, 1000);
+				$timeout($scope.moveRobotForwardOnGraph, 500);
 			}
 		}
-		$scope.moveRobotOnGraph = function() {
+		$scope.moveRobotForwardOnGraph = function() {
 			if ($scope.model.x < 8) { 
 				$scope.model.x += .50;
 				var color = "blue";
@@ -132,19 +168,230 @@ app.controller('setupController', ['$scope', 'navigationFactory', 'robotFactory'
 				$scope.model.data.push({ data: [[$scope.model.x,calc($scope.model.x)]],
 										 color:color,
 										 points: { show: true } });
-				$timeout($scope.moveRobotOnGraph, 1000);
+				$timeout($scope.moveRobotForwardOnGraph, 500);
+			} else {
+				$timeout($scope.moveRobotBackwardOnGraph, 500);
 			}
 		};
+		$scope.moveRobotBackwardOnGraph = function() {
+			if ($scope.model.x > 0) { 
+				$scope.model.x -= .50;
+				var color = "blue";
+				if (calc($scope.model.x) == 0) {
+					color = "red";
+				}
+				$scope.model.data = [];
+				var functionLine = { data: []};
+				for (var x = 0; x <= 8; x+= .25) {
+					functionLine.data.push([x, calc(x)]);
+				}
+				$scope.model.data.push(functionLine);
+				$scope.model.data.push({ data: [[$scope.model.x,calc($scope.model.x)]],
+										 color:color,
+										 points: { show: true } });
+				$timeout($scope.moveRobotBackwardOnGraph, 500);
+			} else {
+				$timeout($scope.finishSimulation, 500);
+			}
+		};
+		$scope.finishSimulation = function() {
+			if ($scope.model.y > 0) {
+				$scope.model.y -= 1;
+				$scope.model.data = [];
+				var functionLine = { data: []};
+				for (var x = 0; x <= 8; x+= .25) {
+					functionLine.data.push([x, calc(x)]);
+				}
+				$scope.model.data.push(functionLine);
+				$scope.model.data.push({ data: [[$scope.model.x, $scope.model.y]],
+						 color:"blue",
+						 points: { show: true } });
+				$timeout($scope.finishSimulation, 250);
+			}
+		}
 		// Generate Graph Data.
 		var functionLine = { data: []};
-		for (var x = 0; x <= 8; x+= .25) {
-			functionLine.data.push([x, calc(x)]);
-		}
+		var example1Calc = { data: []};
+		var example2Calc = { data: [], xaxis: {tickSize: 10}};
+		var example3Calc = { data: [], xaxis: {tickSize: 10}};
+		generateData(functionLine, calc, 0, 8, .25);
+		generateData(example1Calc, exampleOneFunction, -5, 5, .25);
+		generateData(example2Calc, exampleTwoFunction, -5, 5, .125);
+		generateData(example3Calc, exampleThreeFunction, -5, 5, .125);
+		
 		$scope.model.data.push(functionLine);
+		$scope.model.exmp1Data.push(example1Calc);
+		$scope.model.exmp2Data.push(example2Calc);
+		$scope.model.exmp3Data.push(example3Calc);
 		$scope.model.data.push({ data: [[0,0]], color:"blue", points: { show: true } });
 		
 		// Start Moving the robot and graph.
-		$timeout($scope.startSimulation, 1000);
+		$timeout($scope.startSimulation, 250);
+	}
+]).controller('exploreController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$timeout',
+	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
+		function exploreFunction(x, a, b, c) {
+			var y = (parseFloat(a) * x * x) + (parseFloat(b)* x) + parseFloat(c);
+			return y;
+		}
+		// Set Scope.
+		$scope.model = {
+			a: 1,
+			b: 1,
+			c: 0,
+			type: 'positive',
+			data: [],
+			options: { }
+		};
+		$scope.calculate = function() {
+			$scope.model.data = [];
+			var calcData = { data: [] };
+			for (var x = -20; x <= 20; x+= .25) {
+				calcData.data.push([x, exploreFunction(x, $scope.model.a, $scope.model.b, $scope.model.c)]);
+			}
+			$scope.model.data.push(calcData);
+		};
+		$scope.displayType = function() {
+			var aVal = parseFloat($scope.model.a);
+			var bVal = parseFloat($scope.model.b);
+			var cVal = parseFloat($scope.model.c);
+			var val = (bVal * bVal) - (4 * aVal * cVal);
+			if (val > 0) {
+				$scope.model.type = 'positive';
+			} else if (val < 0) {
+				$scope.model.type = 'negative';
+			} else {
+				$scope.model.type = 'zero';
+			}
+		}
+		$scope.$watch("model.a", function(newValue, oldValue) {
+			$scope.displayType();
+		});
+		$scope.$watch("model.b", function(newValue, oldValue) {
+			$scope.displayType();
+		});
+		$scope.$watch("model.c", function(newValue, oldValue) {
+			$scope.displayType();
+		});
+		$scope.calculate();
+		$scope.displayType();
+	}
+]).controller('exampleOneController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$timeout',
+	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
+		function exploreFunction(x, a, b, c) {
+			var y = (parseFloat(a) * x * x) + (parseFloat(b)* x) + parseFloat(c);
+			return y;
+		}
+		// Set Scope.
+		$scope.model = {
+			a: 1,
+			b: -4,
+			c: 3,
+			type: 'positive',
+			data: [],
+			options: { }
+		};
+		$scope.calculate = function() {
+			$scope.model.data = [];
+			var calcData = { data: [] };
+			for (var x = -5; x <= 5; x+= .25) {
+				calcData.data.push([x, exploreFunction(x, $scope.model.a, $scope.model.b, $scope.model.c)]);
+			}
+			$scope.model.data.push(calcData);
+		};
+		$scope.displayType = function() {
+			var aVal = parseFloat($scope.model.a);
+			var bVal = parseFloat($scope.model.b);
+			var cVal = parseFloat($scope.model.c);
+			var val = (bVal * bVal) - (4 * aVal * cVal);
+			if (val > 0) {
+				$scope.model.type = 'positive';
+			} else if (val < 0) {
+				$scope.model.type = 'negative';
+			} else {
+				$scope.model.type = 'zero';
+			}
+		}
+		$scope.calculate();
+		$scope.displayType();
+	}
+]).controller('exampleTwoController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$timeout',
+	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
+		function exploreFunction(x, a, b, c) {
+			var y = (parseFloat(a) * x * x) + (parseFloat(b)* x) + parseFloat(c);
+			return y;
+		}
+		// Set Scope.
+		$scope.model = {
+			a: 1,
+			b: 2,
+			c: 1,
+			type: 'positive',
+			data: [],
+			options: { }
+		};
+		$scope.calculate = function() {
+			$scope.model.data = [];
+			var calcData = { data: [] };
+			for (var x = -5; x <= 5; x+= .25) {
+				calcData.data.push([x, exploreFunction(x, $scope.model.a, $scope.model.b, $scope.model.c)]);
+			}
+			$scope.model.data.push(calcData);
+		};
+		$scope.displayType = function() {
+			var aVal = parseFloat($scope.model.a);
+			var bVal = parseFloat($scope.model.b);
+			var cVal = parseFloat($scope.model.c);
+			var val = (bVal * bVal) - (4 * aVal * cVal);
+			if (val > 0) {
+				$scope.model.type = 'positive';
+			} else if (val < 0) {
+				$scope.model.type = 'negative';
+			} else {
+				$scope.model.type = 'zero';
+			}
+		}
+		$scope.calculate();
+		$scope.displayType();
+	}
+]).controller('exampleThreeController', ['$scope', 'navigationFactory', 'robotFactory', 'predictFactory', '$timeout',
+	function($scope, navigationFactory, robotFactory, predictFactory, $timeout) {
+		function exploreFunction(x, a, b, c) {
+			var y = (parseFloat(a) * x * x) + (parseFloat(b)* x) + parseFloat(c);
+			return y;
+		}
+		// Set Scope.
+		$scope.model = {
+			a: 1,
+			b: -2,
+			c: 2,
+			type: 'positive',
+			data: [],
+			options: { }
+		};
+		$scope.calculate = function() {
+			$scope.model.data = [];
+			var calcData = { data: [] };
+			for (var x = -5; x <= 5; x+= .25) {
+				calcData.data.push([x, exploreFunction(x, $scope.model.a, $scope.model.b, $scope.model.c)]);
+			}
+			$scope.model.data.push(calcData);
+		};
+		$scope.displayType = function() {
+			var aVal = parseFloat($scope.model.a);
+			var bVal = parseFloat($scope.model.b);
+			var cVal = parseFloat($scope.model.c);
+			var val = (bVal * bVal) - (4 * aVal * cVal);
+			if (val > 0) {
+				$scope.model.type = 'positive';
+			} else if (val < 0) {
+				$scope.model.type = 'negative';
+			} else {
+				$scope.model.type = 'zero';
+			}
+		}
+		$scope.calculate();
+		$scope.displayType();
 	}
 ]).controller('navigationController', ['$scope', 'navigationFactory',
 	function($scope, navigationFactory) {
@@ -223,7 +470,7 @@ app.factory('navigationFactory', function() {
 		}
 	}
 }).factory('predictFactory', function() {
-	var prediction = 0;
+	var prediction = -1;
 	return {
 		setPrediction: function(value) {
 			prediction = value;

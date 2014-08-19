@@ -8,17 +8,18 @@
 	<div class="col-sm-12 col-md-12">
 		<h2>Predict</h2>
 		<p>
-			How many times will the graph of y = x<sup>2</sup> - 8x + 7 <br />
-			<span style="color: blue;">a = 1</span>; 
-			<span style="color: red;">b = 8</span>;
-			<span style="color: green;">c = 7</span><br />
-			Cross the x-axis?
+			Graph of y = x<sup>2</sup> - 8x + 7<br />
+			where <span style="color: blue;">a = 1</span>,  
+			<span style="color: red;">b = 8</span>, and
+			<span style="color: green;">c = 7</span>
 		</p>
 		<chart ng-model="model.data" chart-options="model.options"></chart>
 		<hr />
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(1)">One</button></p>
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(2)">Two</button></p>
-		<p><button class="btn btn-primary" ng-href="#/calculate" ng-click="predict(3)">Three</button></p>
+
+		<h4>How many times will the graph of above Cross the x-axis?</h4>
+		<p><button class="btn btn-primary" ng-click="predict(2)">Twice</button></p>
+		<p><button class="btn btn-primary" ng-click="predict(1)">Once</button></p>
+		<p><button class="btn btn-primary" ng-click="predict(0)">None</button></p>
 	</div>
 </div>
 <div class="row">
